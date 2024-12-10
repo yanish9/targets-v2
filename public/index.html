@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Picker with Coloris</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Coloris CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css"/>
+  <style>
+    .color-sample {
+      width: 50px;
+      height: 50px;
+      border: 1px solid #ccc;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .result-box {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white text-center">
+            <h4>Interactive Color Picker</h4>
+          </div>
+          <div class="card-body text-center">
+            <label for="colorInput" class="form-label">Pick a Color:</label>
+            <div>
+              <input 
+                type="text" 
+                id="colorInput" 
+                class="form-control d-inline-block w-auto"
+                value="#ff0000"
+              >
+              <div 
+                class="color-sample ms-3" 
+                id="colorSample" 
+                style="background-color: #ff0000;">
+              </div>
+            </div>
+            <!-- Save Button -->
+            <button id="saveColorBtn" class="btn btn-primary mt-3">Save Color</button>
+
+            <!-- Display RGB -->
+            <div class="result-box mt-3" id="rgbResult"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coloris JS -->
+  <script src="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js"></script>
+  <script>
+    // Initialize Coloris
+    Coloris({
+      el: '#colorInput', // Attach Coloris to the input element
+      themeMode: 'light', // Optional: Set theme (light or dark)
+    });
+
+    const colorInput = document.getElementById('colorInput');
+    const colorSample = document.getElementById('colorSample');
+    const saveColorBtn = document.getElementById('saveColorBtn');
+    const rgbResult = document.getElementById('rgbResult');
+
+    // Update the sample box when the color changes
+    colorInput.addEventListener('input', (event) => {
+      colorSample.style.backgroundColor = event.target.value;
+    });
+
+    // Convert Hex to RGB
+    function hexToRgb(hex) {
+      // Remove the '#' if it exists
+      hex = hex.replace(/^#/, '');
+      
+      // Convert 3-digit hex to 6-digit hex
+      if (hex.length === 3) {
+        hex = hex.split('').map(function (char) {
+          return char + char;
+        }).join('');
+      }
+      
+      // Extract RGB components
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+
+      return { r, g, b };
+    }
+
+    // Save Color and display RGB
+  saveColorBtn.addEventListener('click', async () => {
+      const colorValue = colorInput.value;
+      const rgb = hexToRgb(colorValue);
+      if (!rgb) {
+        statusMessage.textContent = "Invalid color!";
+        statusMessage.style.color = "red";
+        return;
+      }
+
+      // Send the RGB values to the Node.js server
+      const response = await fetch('/save_color', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          r: rgb.r,
+          g: rgb.g,
+          b: rgb.b,
+        }),
+      });
+
+      if (response.ok) {
+        statusMessage.textContent = "Color saved successfully!";
+        statusMessage.style.color = "green";
+      } else {
+        statusMessage.textContent = "Error saving color!";
+        statusMessage.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>
