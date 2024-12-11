@@ -87,9 +87,9 @@ app.post('/save_all', (req, res) => {
 
     // Send success response with script output
     console.log(`Script Output: ${stdout}`);
-    res.status(200).json({
-      status: 'success',
-      message: `Color RGB(${item.color}) saved successfully`,
+    // res.status(200).json({
+    //   status: 'success',
+    //   message: `Color RGB(${item.color}) saved successfully`,
     });
   });
 
