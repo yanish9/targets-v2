@@ -76,10 +76,14 @@ app.post('/save_all', (req, res) => {
 
 
       
+
+  });
+
+
   const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter_set_color.py');
 
   // Run the Python script with RGB values as arguments
-  exec(`sudo python3 ${scriptPath} ${item.color}`, (err, stdout, stderr) => {
+  exec(`sudo python3 ${scriptPath} ${items[0].color}`, (err, stdout, stderr) => {
     if (err) {
       console.error(`Error: ${stderr}`);
       return res.status(500).send('Error executing Python script');
@@ -94,10 +98,6 @@ app.post('/save_all', (req, res) => {
   });
 
   
-
-  });
-
-
 
 
   res.status(200).send('Data saved successfully');
