@@ -90,7 +90,7 @@ app.post('/save_all', (req, res) => {
     // res.status(200).json({
     //   status: 'success',
     //   message: `Color RGB(${item.color}) saved successfully`,
-    });
+    // });
   });
 
   
