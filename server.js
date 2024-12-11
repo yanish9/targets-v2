@@ -78,6 +78,8 @@ app.post('/save_all', (req, res) => {
   });
 
   const jsonString = JSON.stringify(items);
+  jsonString = jsonString.replace(/"/g, "'");
+
   console.log(jsonString);
       
   const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter_set_color.py');
