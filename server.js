@@ -77,7 +77,7 @@ app.post('/save_all', (req, res) => {
 
   });
 
-  const jsonString = JSON.stringify(items);
+  var jsonString = JSON.stringify(items);
   jsonString = jsonString.replace(/"/g, "'");
 
   console.log(jsonString);
