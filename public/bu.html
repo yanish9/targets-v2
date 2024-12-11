@@ -89,13 +89,12 @@
     </div>
     <script>
         let selectedElement = null;
-        let currentDraggable = null;
-    
+
         const draggables = document.querySelectorAll('.draggable');
         const container = document.querySelector('.drag-container');
         const colorBlocks = document.querySelectorAll('.color-block');
         const saveButton = document.getElementById('saveButton');
-    
+
         window.addEventListener('DOMContentLoaded', () => {
             // Fetch saved data from the backend on page load
             fetch('/load_all')
@@ -113,88 +112,45 @@
                 })
                 .catch(error => console.error('Error loading data:', error));
         });
-    
-        const updatePosition = (e, draggable) => {
-            const containerRect = container.getBoundingClientRect();
-            const x = (e.clientX || e.touches[0].clientX) - containerRect.left;
-            const y = (e.clientY || e.touches[0].clientY) - containerRect.top;
-    
-            draggable.style.left = `${x}px`;
-            draggable.style.top = `${y}px`;
-    
-            console.log(`Moved ${draggable.id} to position: (${x}px, ${y}px)`);
-        };
-    
+
+        
         draggables.forEach(draggable => {
-            let isDragging = false;
-        
-            draggable.addEventListener('mousedown', () => {
-                isDragging = false;
-            });
-        
-            draggable.addEventListener('mousemove', () => {
-                isDragging = true;
-            });
-        
-            draggable.addEventListener('click', (e) => {
-                if (isDragging) {
-                    e.preventDefault();
-                    isDragging = false; // Reset dragging state
-                    console.log('Drag finalized, click ignored.');
-                    return;
-                }
-        
-                // Select the element on click
+            draggable.addEventListener('click', () => {
                 draggables.forEach(item => item.classList.remove('selected'));
                 draggable.classList.add('selected');
                 selectedElement = draggable;
                 console.log(`Selected: ${draggable.id}`);
             });
-        
+
             draggable.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('text/plain', draggable.id);
                 setTimeout(() => draggable.classList.add('invisible'), 0);
             });
-        
+
             draggable.addEventListener('dragend', () => {
                 draggable.classList.remove('invisible');
-                console.log('Drag ended.');
             });
         });
-        
+
         container.addEventListener('dragover', (e) => {
             e.preventDefault();
         });
-        
+
         container.addEventListener('drop', (e) => {
             e.preventDefault();
             const id = e.dataTransfer.getData('text/plain');
             const draggedItem = document.getElementById(id);
-        
+
             const containerRect = container.getBoundingClientRect();
             const x = e.clientX - containerRect.left;
             const y = e.clientY - containerRect.top;
-        
+
             draggedItem.style.left = `${x}px`;
             draggedItem.style.top = `${y}px`;
-        
+
             console.log(`Moved ${id} to position: (${x}px, ${y}px)`);
         });
-    
-        // Dragging within the container
-        container.addEventListener('mousemove', (e) => {
-            if (currentDraggable) {
-                updatePosition(e, currentDraggable);
-            }
-        });
-    
-        container.addEventListener('touchmove', (e) => {
-            if (currentDraggable) {
-                updatePosition(e, currentDraggable);
-            }
-        });
-    
-        // Change color on block click
+
         colorBlocks.forEach(block => {
             block.addEventListener('click', () => {
                 if (selectedElement) {
@@ -206,8 +162,7 @@
                 }
             });
         });
-    
-        // Save button functionality
+
         saveButton.addEventListener('click', () => {
             const items = [];
             draggables.forEach(draggable => {
@@ -215,12 +170,13 @@
                 const color = window.getComputedStyle(draggable).backgroundColor;
                 const left = draggable.style.left;
                 const top = draggable.style.top;
-    
+
+
                 items.push({ id, color, left, top });
             });
-    
+
             console.log('Saving data:', items);
-    
+
             // Send data to Node.js backend
             fetch('/save_all', {
                 method: 'POST',
@@ -234,11 +190,12 @@
                         console.log('Data saved successfully');
                         const saveMessage = document.getElementById('saveMessage');
                         saveMessage.style.display = 'block';
-    
+        
                         // Hide the message after 2 seconds
                         setTimeout(() => {
                             saveMessage.style.display = 'none';
                         }, 2000);
+
                     } else {
                         console.error('Failed to save data');
                     }
@@ -246,6 +203,5 @@
                 .catch(error => console.error('Error:', error));
         });
     </script>
-    
 </body>
 </html>
