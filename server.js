@@ -1,8 +1,20 @@
 const express = require("express");
 const path = require("path");
-const { exec } = require('child_process');
+const { exec } = require('child_process'); 
+const sqlite3 = require('sqlite3').verbose();
+
 const app = express();
 app.use(express.json());
+
+const db = new sqlite3.Database('./targets.db');
+
+db.run(`CREATE TABLE IF NOT EXISTS targets (
+  id TEXT PRIMARY KEY,
+  color TEXT,
+  left TEXT,
+  top TEXT
+)`);
+
 
 const PORT = 3000;
 
@@ -10,8 +22,12 @@ const PORT = 3000;
 app.use(express.static(path.join(__dirname, "public")));
 
 // Fallback route for other requests
-app.get("*", (req, res) => {
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.get("/test", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "text.html"));
 });
 
 app.post('/save_color', (req, res) => {
@@ -35,6 +51,58 @@ app.post('/save_color', (req, res) => {
     });
   });
 });
+
+// Load data
+app.get('/load_all', (req, res) => {
+  db.all(`SELECT * FROM targets`, [], (err, rows) => {
+      if (err) {
+          console.error(err.message);
+          return res.status(500).send('Error retrieving data');
+      }
+      res.json(rows);
+  });
+});
+
+
+app.post('/save_all', (req, res) => {
+  const items = req.body;
+
+  items.forEach(item => {
+      db.run(
+          `INSERT INTO targets (id, color, left, top) VALUES (?, ?, ?, ?)
+           ON CONFLICT(id) DO UPDATE SET color = ?, left = ?, top = ?`,
+          [item.id, item.color, item.left, item.top, item.color, item.left, item.top]
+      );
+
+
+      
+  const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter_set_color.py');
+
+  // Run the Python script with RGB values as arguments
+  exec(`sudo python3 ${scriptPath} ${item.color}`, (err, stdout, stderr) => {
+    if (err) {
+      console.error(`Error: ${stderr}`);
+      return res.status(500).send('Error executing Python script');
+    }
+
+    // Send success response with script output
+    console.log(`Script Output: ${stdout}`);
+    res.status(200).json({
+      status: 'success',
+      message: `Color RGB(${item.color}) saved successfully`,
+    });
+  });
+
+  
+
+  });
+
+
+
+
+  res.status(200).send('Data saved successfully');
+});
+
 
 // Start the server
 app.listen(PORT, () => {
