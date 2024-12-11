@@ -76,13 +76,9 @@ app.post('/save_all', (req, res) => {
 
 
       
-
-  });
-
-
   const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter_set_color.py');
 
-  var l = items[0].color;
+  var l = item.color;
   l = l.substring(l.indexOf("(")+1, l.lastIndexOf(")"))
   // Run the Python script with RGB values as arguments
   exec(`sudo python3 ${scriptPath} ${l}`, (err, stdout, stderr) => {
@@ -100,6 +96,10 @@ app.post('/save_all', (req, res) => {
   });
 
   
+
+
+  });
+
 
 
   res.status(200).send('Data saved successfully');
