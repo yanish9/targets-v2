@@ -128,72 +128,68 @@
         draggables.forEach(draggable => {
             let isDragging = false;
         
-            draggable.addEventListener('mousedown', () => {
+            const startDrag = (event) => {
                 isDragging = false;
-            });
+                draggable.style.transition = 'none'; // Disable smooth transitions for precise dragging
+            };
         
-            draggable.addEventListener('mousemove', () => {
+            const moveDrag = (event) => {
                 isDragging = true;
-            });
         
-            draggable.addEventListener('click', (e) => {
-                if (isDragging) {
-                    e.preventDefault();
-                    isDragging = false; // Reset dragging state
-                    console.log('Drag finalized, click ignored.');
-                    return;
+                let x, y;
+                if (event.type.startsWith('touch')) {
+                    const touch = event.touches[0];
+                    x = touch.clientX;
+                    y = touch.clientY;
+                } else {
+                    x = event.clientX;
+                    y = event.clientY;
                 }
         
-                // Select the element on click
-                draggables.forEach(item => item.classList.remove('selected'));
-                draggable.classList.add('selected');
-                selectedElement = draggable;
-                console.log(`Selected: ${draggable.id}`);
+                const containerRect = container.getBoundingClientRect();
+                const relativeX = x - containerRect.left;
+                const relativeY = y - containerRect.top;
+        
+                draggable.style.left = `${relativeX}px`;
+                draggable.style.top = `${relativeY}px`;
+            };
+        
+            const endDrag = () => {
+                if (!isDragging) {
+                    // Select the item on tap/click
+                    draggables.forEach(item => item.classList.remove('selected'));
+                    draggable.classList.add('selected');
+                    selectedElement = draggable;
+                    console.log(`Selected: ${draggable.id}`);
+                }
+                isDragging = false;
+            };
+        
+            // Mouse Events
+            draggable.addEventListener('mousedown', startDrag);
+            draggable.addEventListener('mousemove', moveDrag);
+            draggable.addEventListener('mouseup', endDrag);
+        
+            // Touch Events
+            draggable.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevent scrolling while dragging
+                startDrag(e);
             });
         
-            draggable.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', draggable.id);
-                setTimeout(() => draggable.classList.add('invisible'), 0);
+            draggable.addEventListener('touchmove', (e) => {
+                e.preventDefault(); // Prevent scrolling while dragging
+                moveDrag(e);
             });
         
-            draggable.addEventListener('dragend', () => {
-                draggable.classList.remove('invisible');
-                console.log('Drag ended.');
+            draggable.addEventListener('touchend', (e) => {
+                e.preventDefault(); // Finalize drag
+                endDrag(e);
             });
         });
         
-        container.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
+        // Prevent default behavior for container touchmove to avoid interference
+        container.addEventListener('touchmove', (e) => e.preventDefault());
         
-        container.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const id = e.dataTransfer.getData('text/plain');
-            const draggedItem = document.getElementById(id);
-        
-            const containerRect = container.getBoundingClientRect();
-            const x = e.clientX - containerRect.left;
-            const y = e.clientY - containerRect.top;
-        
-            draggedItem.style.left = `${x}px`;
-            draggedItem.style.top = `${y}px`;
-        
-            console.log(`Moved ${id} to position: (${x}px, ${y}px)`);
-        });
-    
-        // Dragging within the container
-        container.addEventListener('mousemove', (e) => {
-            if (currentDraggable) {
-                updatePosition(e, currentDraggable);
-            }
-        });
-    
-        container.addEventListener('touchmove', (e) => {
-            if (currentDraggable) {
-                updatePosition(e, currentDraggable);
-            }
-        });
-    
         // Change color on block click
         colorBlocks.forEach(block => {
             block.addEventListener('click', () => {
