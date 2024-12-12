@@ -83,7 +83,10 @@
             </div>
         </div>
     </div>
-
+    <div class="control-buttons">
+        <button class="btn btn-primary" id="enableDraggingButton">Enable Dragging</button>
+        <button class="btn btn-success" id="doneButton" disabled>Done</button>
+    </div>
     <div id="saveMessage" class="alert alert-success position-fixed top-0 end-0 m-3" style="display: none; z-index: 1050;">
         Saved successfully!
     </div>
@@ -91,8 +94,11 @@
         let selectedElement = null;
         let currentDraggable = null;
     
+        const enableDraggingButton = document.getElementById('enableDraggingButton');
+        const doneButton = document.getElementById('doneButton');
         const draggables = document.querySelectorAll('.draggable');
         const container = document.querySelector('.drag-container');
+        let isDraggingEnabled = false;
         const colorBlocks = document.querySelectorAll('.color-block');
         const saveButton = document.getElementById('saveButton');
     
@@ -125,95 +131,83 @@
             console.log(`Moved ${draggable.id} to position: (${x}px, ${y}px)`);
         };
     
-        draggables.forEach(draggable => {
+        const toggleDragging = (enable) => {
+            draggables.forEach(draggable => {
+                if (enable) {
+                    draggable.addEventListener('mousedown', startDrag);
+                    draggable.addEventListener('touchstart', startDrag);
+                } else {
+                    draggable.removeEventListener('mousedown', startDrag);
+                    draggable.removeEventListener('touchstart', startDrag);
+                }
+            });
+        };
+
+        const startDrag = (event) => {
             let isDragging = false;
-            let isReadyToDrag = false;
-            let offsetX = 0;
-            let offsetY = 0;
-            let startX = 0;
-            let startY = 0;
-        
-            const startDrag = (event) => {
-                isReadyToDrag = true;
-                draggable.style.transition = 'none'; // Disable smooth transitions for precise dragging
-        
-                // Store starting position
-                if (event.type.startsWith('touch')) {
-                    const touch = event.touches[0];
-                    startX = touch.clientX;
-                    startY = touch.clientY;
+            let offsetX, offsetY;
+
+            const draggable = event.target;
+            const rect = draggable.getBoundingClientRect();
+
+            // Calculate the offset
+            if (event.type.startsWith('touch')) {
+                const touch = event.touches[0];
+                offsetX = touch.clientX - rect.left;
+                offsetY = touch.clientY - rect.top;
+            } else {
+                offsetX = event.clientX - rect.left;
+                offsetY = event.clientY - rect.top;
+            }
+
+            const moveDrag = (moveEvent) => {
+                isDragging = true;
+                let x, y;
+                if (moveEvent.type.startsWith('touch')) {
+                    const touch = moveEvent.touches[0];
+                    x = touch.clientX - offsetX;
+                    y = touch.clientY - offsetY;
                 } else {
-                    startX = event.clientX;
-                    startY = event.clientY;
+                    x = moveEvent.clientX - offsetX;
+                    y = moveEvent.clientY - offsetY;
                 }
-        
-                const rect = draggable.getBoundingClientRect();
-                offsetX = startX - rect.left;
-                offsetY = startY - rect.top;
+                const containerRect = container.getBoundingClientRect();
+                draggable.style.left = `${Math.max(0, Math.min(containerRect.width - rect.width, x - containerRect.left))}px`;
+                draggable.style.top = `${Math.max(0, Math.min(containerRect.height - rect.height, y - containerRect.top))}px`;
             };
-        
-            const moveDrag = (event) => {
-                if (!isReadyToDrag) return;
-        
-                let currentX, currentY;
-                if (event.type.startsWith('touch')) {
-                    const touch = event.touches[0];
-                    currentX = touch.clientX;
-                    currentY = touch.clientY;
-                } else {
-                    currentX = event.clientX;
-                    currentY = event.clientY;
-                }
-        
-                // Check if movement exceeds threshold (e.g., 5px)
-                const deltaX = Math.abs(currentX - startX);
-                const deltaY = Math.abs(currentY - startY);
-        
-                if (!isDragging && (deltaX > 5 || deltaY > 5)) {
-                    isDragging = true; // Start dragging
-                }
-        
+
+            const stopDrag = () => {
+                document.removeEventListener('mousemove', moveDrag);
+                document.removeEventListener('touchmove', moveDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
                 if (isDragging) {
-                    const containerRect = container.getBoundingClientRect();
-                    const relativeX = currentX - containerRect.left - offsetX;
-                    const relativeY = currentY - containerRect.top - offsetY;
-        
-                    draggable.style.left = `${Math.max(0, relativeX)}px`; // Prevent going out of bounds
-                    draggable.style.top = `${Math.max(0, relativeY)}px`;
+                    console.log(`Stopped dragging ${draggable.id}`);
                 }
             };
-        
-            const endDrag = () => {
-                isDragging = false;
-                isReadyToDrag = false;
-            };
-        
-            // Mouse Events
-            draggable.addEventListener('mousedown', (e) => {
-                startDrag(e);
-            });
-            document.addEventListener('mousemove', (e) => {
-                moveDrag(e);
-            });
-            document.addEventListener('mouseup', () => {
-                endDrag();
-            });
-        
-            // Touch Events
-            draggable.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // Prevent scrolling
-                startDrag(e);
-            });
-        
-            document.addEventListener('touchmove', (e) => {
-                e.preventDefault(); // Prevent scrolling
-                moveDrag(e);
-            });
-        
-            document.addEventListener('touchend', () => {
-                endDrag();
-            });
+
+            document.addEventListener('mousemove', moveDrag);
+            document.addEventListener('touchmove', moveDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+        };
+
+        enableDraggingButton.addEventListener('click', () => {
+            isDraggingEnabled = true;
+            toggleDragging(true);
+            enableDraggingButton.disabled = true;
+            doneButton.disabled = false;
         });
+
+        doneButton.addEventListener('click', () => {
+            isDraggingEnabled = false;
+            toggleDragging(false);
+            enableDraggingButton.disabled = false;
+            doneButton.disabled = true;
+        });
+
+        // Disable dragging initially
+        toggleDragging(false);
         
         
         // Change color on block click
