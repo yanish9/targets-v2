@@ -127,68 +127,94 @@
     
         draggables.forEach(draggable => {
             let isDragging = false;
+            let isReadyToDrag = false;
+            let offsetX = 0;
+            let offsetY = 0;
+            let startX = 0;
+            let startY = 0;
         
             const startDrag = (event) => {
-                isDragging = false;
+                isReadyToDrag = true;
                 draggable.style.transition = 'none'; // Disable smooth transitions for precise dragging
+        
+                // Store starting position
+                if (event.type.startsWith('touch')) {
+                    const touch = event.touches[0];
+                    startX = touch.clientX;
+                    startY = touch.clientY;
+                } else {
+                    startX = event.clientX;
+                    startY = event.clientY;
+                }
+        
+                const rect = draggable.getBoundingClientRect();
+                offsetX = startX - rect.left;
+                offsetY = startY - rect.top;
             };
         
             const moveDrag = (event) => {
-                isDragging = true;
+                if (!isReadyToDrag) return;
         
-                let x, y;
+                let currentX, currentY;
                 if (event.type.startsWith('touch')) {
                     const touch = event.touches[0];
-                    x = touch.clientX;
-                    y = touch.clientY;
+                    currentX = touch.clientX;
+                    currentY = touch.clientY;
                 } else {
-                    x = event.clientX;
-                    y = event.clientY;
+                    currentX = event.clientX;
+                    currentY = event.clientY;
                 }
         
-                const containerRect = container.getBoundingClientRect();
-                const relativeX = x - containerRect.left;
-                const relativeY = y - containerRect.top;
+                // Check if movement exceeds threshold (e.g., 5px)
+                const deltaX = Math.abs(currentX - startX);
+                const deltaY = Math.abs(currentY - startY);
         
-                draggable.style.left = `${relativeX}px`;
-                draggable.style.top = `${relativeY}px`;
+                if (!isDragging && (deltaX > 5 || deltaY > 5)) {
+                    isDragging = true; // Start dragging
+                }
+        
+                if (isDragging) {
+                    const containerRect = container.getBoundingClientRect();
+                    const relativeX = currentX - containerRect.left - offsetX;
+                    const relativeY = currentY - containerRect.top - offsetY;
+        
+                    draggable.style.left = `${Math.max(0, relativeX)}px`; // Prevent going out of bounds
+                    draggable.style.top = `${Math.max(0, relativeY)}px`;
+                }
             };
         
             const endDrag = () => {
-                if (!isDragging) {
-                    // Select the item on tap/click
-                    draggables.forEach(item => item.classList.remove('selected'));
-                    draggable.classList.add('selected');
-                    selectedElement = draggable;
-                    console.log(`Selected: ${draggable.id}`);
-                }
                 isDragging = false;
+                isReadyToDrag = false;
             };
         
             // Mouse Events
-            draggable.addEventListener('mousedown', startDrag);
-            draggable.addEventListener('mousemove', moveDrag);
-            draggable.addEventListener('mouseup', endDrag);
+            draggable.addEventListener('mousedown', (e) => {
+                startDrag(e);
+            });
+            document.addEventListener('mousemove', (e) => {
+                moveDrag(e);
+            });
+            document.addEventListener('mouseup', () => {
+                endDrag();
+            });
         
             // Touch Events
             draggable.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // Prevent scrolling while dragging
+                e.preventDefault(); // Prevent scrolling
                 startDrag(e);
             });
         
-            draggable.addEventListener('touchmove', (e) => {
-                e.preventDefault(); // Prevent scrolling while dragging
+            document.addEventListener('touchmove', (e) => {
+                e.preventDefault(); // Prevent scrolling
                 moveDrag(e);
             });
         
-            draggable.addEventListener('touchend', (e) => {
-                e.preventDefault(); // Finalize drag
-                endDrag(e);
+            document.addEventListener('touchend', () => {
+                endDrag();
             });
         });
         
-        // Prevent default behavior for container touchmove to avoid interference
-        container.addEventListener('touchmove', (e) => e.preventDefault());
         
         // Change color on block click
         colorBlocks.forEach(block => {
