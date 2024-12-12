@@ -20,9 +20,12 @@
             margin-bottom: 10px;
             border: 2px solid transparent;
             position: absolute;
+            border-radius: 40px;
+
         }
         .draggable.selected {
-            border: 2px solid #007bff;
+            border: 5px solid #050505 ;
+            border-style: dashed;
         }
         .drag-container {
             border: 2px dashed #ccc;
@@ -76,13 +79,16 @@
                         <div class="color-block bg-primary" data-color="#0d6efd">Primary</div>
                     </div>
                     <div class="col-md-6 col-sm-4 mb-3">
-                        <div class="color-block bg-secondary" data-color="#6c757d">Secondary</div>
+                        <div class="color-block bg-secondary" data-color="rgb(213,123,111)">Secondary</div>
                     </div>
                     <div class="col-md-6 col-sm-4 mb-3">
                         <div class="color-block bg-success" data-color="#198754">Success</div>
                     </div>
                     <div class="col-md-6 col-sm-4 mb-3">
-                        <div class="color-block bg-danger" data-color="#dc3545">Danger</div>
+                        <div class="color-block bg-danger" data-color="rgb(255, 0, 0)">Danger</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div class="color-block bg-danger" data-color="rgb(215, 20, 0)">Orange</div>
                     </div>
                 </div>
             </div>
@@ -91,15 +97,15 @@
             <div class="col-md-8 d-flex">
                 <div class="drag-main ">
                 <div class="control-buttons">
-                    <button class="btn btn-primary" id="enableDraggingButton">Enable Dragging</button>
+                    <button class="btn btn-primary" id="enableDraggingButton">Re-arrange Targets</button>
                     <button class="btn btn-success" id="doneButton" style="display: none;">Done</button>
 
                 </div>
             
                 <div class="drag-container w-100">
-                    <div class="draggable" draggable="true" id="pg1" style="left: 50px; top: 50px;">Item 1</div>
-                    <div class="draggable" draggable="true" id="pg2" style="left: 150px; top: 50px;">Item 2</div>
-                    <div class="draggable" draggable="true" id="pg3" style="left: 250px; top: 50px;">Item 3</div>
+                    <div class="draggable" draggable="true" id="pg1" style="left: 50px; top: 50px;">T 1</div>
+                    <div class="draggable" draggable="true" id="pg2" style="left: 150px; top: 50px;">T 2</div>
+                    <div class="draggable" draggable="true" id="pg3" style="left: 250px; top: 50px;">T 3</div>
                 </div>
             </div>
             </div>
@@ -242,7 +248,7 @@
             block.addEventListener('click', () => {
                 if (selectedElement) {
                     const color = block.getAttribute('data-color');
-                    selectedElement.style.backgroundColor = color;
+                    selectedElement.style.background = color.toString();
                     console.log(`Changed color of ${selectedElement.id} to ${color}`);
                 } else {
                     console.log('No item selected!');
