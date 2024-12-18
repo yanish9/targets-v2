@@ -30,27 +30,71 @@ app.get("/test", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "text.html"));
 });
 
-app.post('/save_color', (req, res) => {
-  const { r, g, b } = req.body;
 
-  // Path to the Python script
-  const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter.py');
+app.post('/save_target_color', (req, res) => {
+  const item = req.body;
 
+  
+      db.run(
+          `INSERT INTO targets (id, color, left, top) VALUES (?, ?, ?, ?)
+           ON CONFLICT(id) DO UPDATE SET color = ?`,
+          [item.id, item.color]
+      );
+
+
+ 
+
+  var jsonString = JSON.stringify(item); 
+
+  jsonString = "'" +jsonString  + "'";
+  console.log(jsonString);
+      
+  const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter_set_color.py');
+
+  // var l = item.color;
+  // l = l.substring(l.indexOf("(")+1, l.lastIndexOf(")"))
   // Run the Python script with RGB values as arguments
-  exec(`sudo python3 ${scriptPath} ${r} ${g} ${b}`, (err, stdout, stderr) => {
+  exec(`sudo python3 ${scriptPath} ${jsonString}`, (err, stdout, stderr) => {
     if (err) {
       console.error(`Error: ${stderr}`);
-      return res.status(500).send('Error executing Python script');
+     // return res.status(500).send('Error executing Python script');
     }
 
     // Send success response with script output
     console.log(`Script Output: ${stdout}`);
-    res.status(200).json({
-      status: 'success',
-      message: `Color RGB(${r}, ${g}, ${b}) saved successfully`,
-    });
+    // res.status(200).json({
+    //   status: 'success',
+    //   message: `Color RGB(${item.color}) saved successfully`,
+    // });
   });
+
+  
+
+
+  res.status(200).send('Data saved successfully');
 });
+
+// app.post('/save_color', (req, res) => {
+//   const { r, g, b } = req.body;
+
+//   // Path to the Python script
+//   const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter.py');
+
+//   // Run the Python script with RGB values as arguments
+//   exec(`sudo python3 ${scriptPath} ${r} ${g} ${b}`, (err, stdout, stderr) => {
+//     if (err) {
+//       console.error(`Error: ${stderr}`);
+//       return res.status(500).send('Error executing Python script');
+//     }
+
+//     // Send success response with script output
+//     console.log(`Script Output: ${stdout}`);
+//     res.status(200).json({
+//       status: 'success',
+//       message: `Color RGB(${r}, ${g}, ${b}) saved successfully`,
+//     });
+//   });
+// });
 
 // Load data
 app.get('/load_all', (req, res) => {
@@ -64,7 +108,7 @@ app.get('/load_all', (req, res) => {
 });
 
 
-app.post('/save_all', (req, res) => {
+app.post('/save_target_pos', (req, res) => {
   const items = req.body;
 
   items.forEach(item => {

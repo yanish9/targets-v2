@@ -256,27 +256,7 @@
             toggleDragging(false);
             enableDraggingButton.style.display = 'block';
             doneButton.style.display = 'none';
-        });
 
-        // Disable dragging initially
-        toggleDragging(false);
-        
-        
-        // Change color on block click
-        colorBlocks.forEach(block => {
-            block.addEventListener('click', () => {
-                if (selectedElement) {
-                    const color = block.getAttribute('data-color');
-                    selectedElement.style.background = color.toString();
-                    console.log(`Changed color of ${selectedElement.id} to ${color}`);
-                } else {
-                    console.log('No item selected!');
-                }
-            });
-        });
-    
-        // Save button functionality
-        saveButton.addEventListener('click', () => {
             const items = [];
             draggables.forEach(draggable => {
                 const id = draggable.id;
@@ -290,7 +270,7 @@
             console.log('Saving data:', items);
     
             // Send data to Node.js backend
-            fetch('/save_all', {
+            fetch('/save_target_pos', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -312,6 +292,62 @@
                     }
                 })
                 .catch(error => console.error('Error:', error));
+
+                
+        });
+
+        // Disable dragging initially
+        toggleDragging(false);
+        
+        
+        // Change color on block click
+        colorBlocks.forEach(block => {
+            block.addEventListener('click', () => {
+                if (selectedElement) {
+                    const color = block.getAttribute('data-color');
+                    selectedElement.style.background = color.toString();
+                    console.log(`Changed color of ${selectedElement.id} to ${color}`);
+                    var objTarget = {id:selectedElement.id, color: color };
+
+                   sendTargetData(objTarget); 
+
+                } else {
+                    console.log('No item selected!');
+                }
+              
+            });
+        });
+
+        function   sendTargetData(objTarget){
+            fetch('/save_target_color', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(objTarget),
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Data saved successfully');
+                        const saveMessage = document.getElementById('saveMessage');
+                        saveMessage.style.display = 'block';
+    
+                        // Hide the message after 2 seconds
+                        setTimeout(() => {
+                            saveMessage.style.display = 'none';
+                        }, 2000);
+                    } else {
+                        console.error('Failed to save data');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+
+
+        } 
+    
+        // Save button functionality
+        saveButton.addEventListener('click', () => {
+            
         });
     </script>
     
