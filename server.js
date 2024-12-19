@@ -153,10 +153,16 @@ app.post('/save_target_pos', (req, res) => {
 
   
   
+
+
+  res.status(200).send('Data saved successfully');
+});
+
+
 app.post('/anim-test', (req, res) => {
   const items = req.body;
+ 
 
-   
   var jsonString = JSON.stringify(items); 
 
   jsonString = "'" +jsonString  + "'";
@@ -181,10 +187,9 @@ app.post('/anim-test', (req, res) => {
     // });
   });
 
-
-
   res.status(200).send('Data saved successfully');
 });
+
 
 
 // Start the server
