@@ -34,11 +34,17 @@ app.get("/test", (req, res) => {
 app.post('/save_target_color', (req, res) => {
   const item = req.body;
 
-  
+  console.log("__________________")
+  console.log(item)
+  console.log(item.id)
+  console.log(item.color)
+
+  console.log("__________________")
+
       db.run(
-          `INSERT INTO targets (id, color, left, top) VALUES (?, ?, ?, ?)
+          `INSERT INTO targets (id, color) VALUES (?, ?)
            ON CONFLICT(id) DO UPDATE SET color = ?`,
-          [item.id, item.color]
+          [item.id, item.color, item.color]
       );
 
 
