@@ -152,6 +152,35 @@ app.post('/save_target_pos', (req, res) => {
   });
 
   
+  
+app.post('/anim-test', (req, res) => {
+  const items = req.body;
+
+   
+  var jsonString = JSON.stringify(items); 
+
+  jsonString = "'" +jsonString  + "'";
+  console.log(jsonString);
+      
+  const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter_set_color.py');
+
+  // var l = item.color;
+  // l = l.substring(l.indexOf("(")+1, l.lastIndexOf(")"))
+  // Run the Python script with RGB values as arguments
+  exec(`sudo python3 ${scriptPath} ${jsonString}`, (err, stdout, stderr) => {
+    if (err) {
+      console.error(`Error: ${stderr}`);
+     // return res.status(500).send('Error executing Python script');
+    }
+
+    // Send success response with script output
+    console.log(`Script Output: ${stdout}`);
+    // res.status(200).json({
+    //   status: 'success',
+    //   message: `Color RGB(${item.color}) saved successfully`,
+    // });
+  });
+
 
 
   res.status(200).send('Data saved successfully');
