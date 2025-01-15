@@ -1,130 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Color Picker with Coloris</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Coloris CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css"/>
-  <style>
-    .color-sample {
-      width: 50px;
-      height: 50px;
-      border: 1px solid #ccc;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .result-box {
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTarget</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <style>
+        body, html {
+            height: 95%;
+            margin: 0;
+        }
+        .draggable {
+            cursor: grab;
+            padding: 20px;
+            background-color: #6c757d;
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 10px;
+            border: 2px solid transparent;
+            position: absolute;
+            border-radius: 40px;
+
+        }
+        .draggable.selected {
+            border: 5px solid #050505 ;
+            border-style: dashed;
+        }
+        .drag-container {
+            border: 2px dashed #ccc;
+            height: 95%;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+        }
+        .drag-main {
+            height: 100%;
+            width: 100%;
+        }
+        .logo{
+            background-color: rgb(39 39 39 / 99%) !important;
+
+        }
+        .logo img{
+            display:block;
+            margin:auto;
+        }
+        .color-block {
+            cursor: pointer;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+        }
+        .save-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+    </style>
 </head>
-<body class="bg-light">
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="card shadow-sm">
-          <div class="card-header bg-primary text-white text-center">
-            <h4>Interactive Color Picker</h4>
-          </div>
-          <div class="card-body text-center">
-            <label for="colorInput" class="form-label">Pick a Color:</label>
-            <div>
-              <input 
-                type="text" 
-                id="colorInput" 
-                class="form-control d-inline-block w-auto"
-                value="#ff0000"
-              >
-              <div 
-                class="color-sample ms-3" 
-                id="colorSample" 
-                style="background-color: #ff0000;">
-              </div>
+<body>
+    <div class=" logo pt-2 pb-2" > <img src="img/itarget.png" width="200"> </div>
+    <div class="container-fluid h-100">
+       
+        <div class="row h-100">
+            <!-- Left Section: Color Palette -->
+            <div class="col-md-4 bg-light overflow-auto position-relative">
+                <!-- <button class="btn btn-success save-button" id="saveButton">Save</button> -->
+                <button class="btn btn-success anim-button" id="anim-button">Anim</button>
+
+                <h2 class="text-center mt-4">Color</h2>
+                <div class="row text-center">
+                    <!-- Color Blocks -->
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(0, 0, 255);" class="color-block " data-color="rgb(0, 0, 255)">Blue</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(160, 32, 240);" class="color-block"  data-color="rgb(160, 32, 240)">Purple</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(100, 15, 90)" class="color-block  " data-color="rgb(100, 15, 90)" data-actual-color='' >Purple 2</div>
+                    </div>
+                    
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(255, 251, 0); color:black;" class="color-block  " data-color="rgb(255, 130, 0)" data-actual-color='' >Yellow</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(0,255,0);" class="color-block " data-color="rgb(0,255,0)">Green</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(255, 0, 0);"  class="color-block " data-color="rgb(255, 0, 0)">Red</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(215, 70, 0)" class="color-block  " data-color="rgb(215, 20, 0)" data-actual-color='' >Orange</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(0, 255, 255)" class="color-block  " data-color="rgb(0, 255, 255)" data-actual-color='' >Teal</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(255, 0, 255)" class="color-block  " data-color="rgb(255, 0, 255)" data-actual-color='' >Pink</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(255, 255, 255); color:black;" class="color-block  " data-color="rgb(255, 255, 255)" data-actual-color='' >White</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(0, 0, 0)" class="color-block  " data-color="rgb(0, 0, 0)" data-actual-color='' >OFF</div>
+                    </div>
+                </div>
             </div>
-            <!-- Save Button -->
-            <button id="saveColorBtn" class="btn btn-primary mt-3">Save Color</button>
 
-            <!-- Display RGB -->
-            <div class="result-box mt-3" id="rgbResult"></div>
-          </div>
+            <!-- Right Section: Draggable Items -->
+            <div class="col-md-8 d-flex">
+                <div class="drag-main ">
+                <div class="control-buttons">
+                    <button class="btn btn-primary" id="enableDraggingButton">Re-arrange Targets</button>
+                    <button class="btn btn-success" id="doneButton" style="display: none;">Done</button>
+
+                </div>
+            
+                <div class="drag-container w-100">
+                    <div class="draggable" draggable="true" id="pg1" style="left: 50px; top: 50px;">T 1</div>
+                    <div class="draggable" draggable="true" id="pg2" style="left: 150px; top: 50px;">T 2</div>
+                    <div class="draggable" draggable="true" id="pg3" style="left: 250px; top: 50px;">T 3</div>
+                </div>
+            </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+   
+    <div id="saveMessage" class="alert alert-success position-fixed top-0 end-0 m-3" style="display: none; z-index: 1050;">
+        Saved successfully!
+    </div>
+    <script>
+        let selectedElement = null;
+        let currentDraggable = null;
+    
+        const enableDraggingButton = document.getElementById('enableDraggingButton');
+        const doneButton = document.getElementById('doneButton');
+        const draggables = document.querySelectorAll('.draggable');
+        const container = document.querySelector('.drag-container');
+        let isDraggingEnabled = false;
+        const colorBlocks = document.querySelectorAll('.color-block');
+        const animBtn = document.getElementById('anim-button');
+    
+        window.addEventListener('DOMContentLoaded', () => {
+            // Fetch saved data from the backend on page load
+            fetch('/load_all')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Loaded data:', data);
+                    data.forEach(item => {
+                        const element = document.getElementById(item.id);
+                        if (element) {
+                            element.style.backgroundColor = item.color;
+                            element.style.left = item.left;
+                            element.style.top = item.top;
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading data:', error));
+        });
+    
+        const updatePosition = (e, draggable) => {
+            const containerRect = container.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - containerRect.left;
+            const y = (e.clientY || e.touches[0].clientY) - containerRect.top;
+    
+            draggable.style.left = `${x}px`;
+            draggable.style.top = `${y}px`;
+    
+            console.log(`Moved ${draggable.id} to position: (${x}px, ${y}px)`);
+        };
+    
+        const toggleDragging = (enable) => {
+    
+            draggables.forEach(draggable => {
+                draggable.addEventListener('click', () => {
+                    draggables.forEach(item => item.classList.remove('selected'));
+                    draggable.classList.add('selected');
+                    selectedElement = draggable;
+                    console.log(`Selected: ${draggable.id}`);
+                });
+                if (enable) {
+                    draggable.addEventListener('mousedown', startDrag);
+                    draggable.addEventListener('touchstart', startDrag);
+                } else {
+                    draggable.removeEventListener('mousedown', startDrag);
+                    draggable.removeEventListener('touchstart', startDrag);
+                }
+            });
+        };
 
-  <!-- Coloris JS -->
-  <script src="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js"></script>
-  <script>
-    // Initialize Coloris
-    Coloris({
-      el: '#colorInput', // Attach Coloris to the input element
-      themeMode: 'light', // Optional: Set theme (light or dark)
-    });
+        const startDrag = (event) => {
+            let isDragging = false;
+            let offsetX, offsetY;
 
-    const colorInput = document.getElementById('colorInput');
-    const colorSample = document.getElementById('colorSample');
-    const saveColorBtn = document.getElementById('saveColorBtn');
-    const rgbResult = document.getElementById('rgbResult');
+            const draggable = event.target;
+            const rect = draggable.getBoundingClientRect();
 
-    // Update the sample box when the color changes
-    colorInput.addEventListener('input', (event) => {
-      colorSample.style.backgroundColor = event.target.value;
-    });
+            // Calculate the offset
+            if (event.type.startsWith('touch')) {
+                const touch = event.touches[0];
+                offsetX = touch.clientX - rect.left;
+                offsetY = touch.clientY - rect.top;
+            } else {
+                offsetX = event.clientX - rect.left;
+                offsetY = event.clientY - rect.top;
+            }
 
-    // Convert Hex to RGB
-    function hexToRgb(hex) {
-      // Remove the '#' if it exists
-      hex = hex.replace(/^#/, '');
-      
-      // Convert 3-digit hex to 6-digit hex
-      if (hex.length === 3) {
-        hex = hex.split('').map(function (char) {
-          return char + char;
-        }).join('');
-      }
-      
-      // Extract RGB components
-      const r = parseInt(hex.substr(0, 2), 16);
-      const g = parseInt(hex.substr(2, 2), 16);
-      const b = parseInt(hex.substr(4, 2), 16);
+            const moveDrag = (moveEvent) => {
+                isDragging = true;
+                let x, y;
+                if (moveEvent.type.startsWith('touch')) {
+                    const touch = moveEvent.touches[0];
+                    x = touch.clientX - offsetX;
+                    y = touch.clientY - offsetY;
+                } else {
+                    x = moveEvent.clientX - offsetX;
+                    y = moveEvent.clientY - offsetY;
+                }
+                const containerRect = container.getBoundingClientRect();
+                draggable.style.left = `${Math.max(0, Math.min(containerRect.width - rect.width, x - containerRect.left))}px`;
+                draggable.style.top = `${Math.max(0, Math.min(containerRect.height - rect.height, y - containerRect.top))}px`;
+            };
 
-      return { r, g, b };
-    }
+            const stopDrag = () => {
+                document.removeEventListener('mousemove', moveDrag);
+                document.removeEventListener('touchmove', moveDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+                if (isDragging) {
+                    console.log(`Stopped dragging ${draggable.id}`);
+                }
+            };
 
-    // Save Color and display RGB
-  saveColorBtn.addEventListener('click', async () => {
-      const colorValue = colorInput.value;
-      const rgb = hexToRgb(colorValue);
-      if (!rgb) {
-        statusMessage.textContent = "Invalid color!";
-        statusMessage.style.color = "red";
-        return;
-      }
+            document.addEventListener('mousemove', moveDrag);
+            document.addEventListener('touchmove', moveDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+        };
 
-      // Send the RGB values to the Node.js server
-      const response = await fetch('/save_color', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          r: rgb.r,
-          g: rgb.g,
-          b: rgb.b,
-        }),
-      });
+        enableDraggingButton.addEventListener('click', () => {
+            isDraggingEnabled = true;
+            toggleDragging(true);
+            enableDraggingButton.style.display = 'none';
+            doneButton.style.display = 'block';
 
-      if (response.ok) {
-        statusMessage.textContent = "Color saved successfully!";
-        statusMessage.style.color = "green";
-      } else {
-        statusMessage.textContent = "Error saving color!";
-        statusMessage.style.color = "red";
-      }
-    });
-  </script>
+        });
+
+        doneButton.addEventListener('click', () => {
+            isDraggingEnabled = false;
+            toggleDragging(false);
+            enableDraggingButton.style.display = 'block';
+            doneButton.style.display = 'none';
+
+            const items = [];
+            draggables.forEach(draggable => {
+                const id = draggable.id;
+                const color = window.getComputedStyle(draggable).backgroundColor;
+                const left = draggable.style.left;
+                const top = draggable.style.top;
+    
+                items.push({ id, color, left, top });
+            });
+    
+            console.log('Saving data:', items);
+    
+            // Send data to Node.js backend
+            fetch('/save_target_pos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(items),
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Data saved successfully');
+                        const saveMessage = document.getElementById('saveMessage');
+                        saveMessage.style.display = 'block';
+    
+                        // Hide the message after 2 seconds
+                        setTimeout(() => {
+                            saveMessage.style.display = 'none';
+                        }, 2000);
+                    } else {
+                        console.error('Failed to save data');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+
+                
+        });
+
+        // Disable dragging initially
+        toggleDragging(false);
+        
+        
+        // Change color on block click
+        colorBlocks.forEach(block => {
+            block.addEventListener('click', () => {
+                if (selectedElement) {
+                    const color = block.getAttribute('data-color');
+                    selectedElement.style.background = color.toString();
+                    console.log(`Changed color of ${selectedElement.id} to ${color}`);
+                    var objTarget = {id:selectedElement.id, color: color };
+
+                   sendTargetData(objTarget); 
+
+                } else {
+                    console.log('No item selected!');
+                }
+              
+            });
+        });
+
+        function   sendTargetData(objTarget){
+            fetch('/save_target_color', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(objTarget),
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Data saved successfully');
+                        const saveMessage = document.getElementById('saveMessage');
+                        saveMessage.style.display = 'block';
+    
+                        // Hide the message after 2 seconds
+                        setTimeout(() => {
+                            saveMessage.style.display = 'none';
+                        }, 2000);
+                    } else {
+                        console.error('Failed to save data');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+
+
+        } 
+    
+        // Save button functionality
+        animBtn.addEventListener('click', () => {
+            fetch('/anim-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({id: "pg3", anim: "1"}),
+            })
+                .then(response => {
+                    if (response.ok) {
+
+                        console.log('successfully');
+                        const saveMessage = document.getElementById('saveMessage');
+                        saveMessage.style.display = 'block';
+    
+                        // Hide the message after 2 seconds
+                        setTimeout(() => {
+                            saveMessage.style.display = 'none';
+                        }, 2000);
+                    } else {
+                        console.error('Failed to save data');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+    
 </body>
 </html>
