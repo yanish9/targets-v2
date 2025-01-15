@@ -65,14 +65,22 @@
     </style>
 </head>
 <body>
-    <div class=" logo pt-2 pb-2" > <img src="img/itarget.png" width="200"> </div>
+    <div class=" logo pt-2 pb-2" >	
+        <button id="reload-btn" class="btn btn-primary m-2 ml-2 position-absolute" onClick="reloadPage()">&#x21bb;</button>
+         <img src="img/itarget.png" width="200">
+         <!-- <div class="control-buttons">
+                  
+         </div> -->
+         <button class="btn btn-primary position-absolute  m-3 mr-2 top-0 end-0" id="enableDraggingButton">Re-arrange Targets</button>
+         <button class="btn btn-success position-absolute   m-3 mr-2 top-0 end-0" id="doneButton" style="display: none;">Done</button>
+    </div>
     <div class="container-fluid h-100">
        
         <div class="row h-100">
             <!-- Left Section: Color Palette -->
             <div class="col-md-4 bg-light overflow-auto position-relative">
                 <!-- <button class="btn btn-success save-button" id="saveButton">Save</button> -->
-                <button class="btn btn-success anim-button" id="anim-button">Anim</button>
+               
 
                 <h2 class="text-center mt-4">Color</h2>
                 <div class="row text-center">
@@ -111,17 +119,19 @@
                     <div class="col-md-6 col-sm-4 mb-3">
                         <div style="background-color:rgb(0, 0, 0)" class="color-block  " data-color="rgb(0, 0, 0)" data-actual-color='' >OFF</div>
                     </div>
+                    
                 </div>
+               <div class="d-flex justify-content-center">
+                <button class="btn btn-secondary anim-button  m-auto w-100" id="anim-button" >Animation Test</button>
+                    <!-- <div  class="btn btn-secondary m-auto w-100"   "></div> -->
+              
+            </div>
             </div>
 
             <!-- Right Section: Draggable Items -->
             <div class="col-md-8 d-flex">
-                <div class="drag-main ">
-                <div class="control-buttons">
-                    <button class="btn btn-primary" id="enableDraggingButton">Re-arrange Targets</button>
-                    <button class="btn btn-success" id="doneButton" style="display: none;">Done</button>
+                <div class="drag-main mt-1 ">
 
-                </div>
             
                 <div class="drag-container w-100">
                     <div class="draggable" draggable="true" id="pg1" style="left: 50px; top: 50px;">T 1</div>
@@ -354,6 +364,7 @@
                return;
             } 
 
+
             fetch('/anim-test', {
                 method: 'POST',
                 headers: {
@@ -378,6 +389,12 @@
                 })
                 .catch(error => console.error('Error:', error));
         });
+
+        function reloadPage(e){
+            e.preventDefalt();
+            location.reload();
+           }
+           
     </script>
     
 </body>
