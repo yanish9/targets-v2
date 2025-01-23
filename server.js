@@ -1,10 +1,18 @@
 const express = require("express");
 const path = require("path");
-const { exec } = require('child_process'); 
+const { exec } = require('child_process');
 const sqlite3 = require('sqlite3').verbose();
+const WebSocket = require('ws');
 
 const app = express();
 const nid = "T_1000";
+
+const WEBSOCKET_URL = 'ws://10.240.242.96:8765';
+let ws;
+let animInProgress = false;
+
+let targetList = {}
+
 
 app.use(express.json());
 
@@ -17,11 +25,18 @@ db.run(`CREATE TABLE IF NOT EXISTS targets (
   top TEXT
 )`);
 
-
 const PORT = 3000;
 
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, "public")));
+
+db.all(`SELECT * FROM targets`, [], (err, rows) => {
+  if (err) {
+    console.error(err.message);
+    return res.status(500).send('Error retrieving data');
+  }
+  console.log(rows)
+});
 
 // Fallback route for other requests
 app.get("/", (req, res) => {
@@ -44,20 +59,20 @@ app.post('/save_target_color', (req, res) => {
 
   console.log("__________________")
 
-      db.run(
-          `INSERT INTO targets (id, color) VALUES (?, ?)
+  db.run(
+    `INSERT INTO targets (id, color) VALUES (?, ?)
            ON CONFLICT(id) DO UPDATE SET color = ?`,
-          [item.id, item.color, item.color]
-      );
+    [item.id, item.color, item.color]
+  );
 
 
- item.nid = nid; 
+  item.nid = nid;
 
-  var jsonString = JSON.stringify(item); 
+  var jsonString = JSON.stringify(item);
 
-  jsonString = "'" +jsonString  + "'";
+  jsonString = "'" + jsonString + "'";
   console.log(jsonString);
-      
+
   const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter_set_color.py');
 
   // var l = item.color;
@@ -66,7 +81,7 @@ app.post('/save_target_color', (req, res) => {
   exec(`sudo python3 ${scriptPath} ${jsonString}`, (err, stdout, stderr) => {
     if (err) {
       console.error(`Error: ${stderr}`);
-     // return res.status(500).send('Error executing Python script');
+      // return res.status(500).send('Error executing Python script');
     }
 
     // Send success response with script output
@@ -105,11 +120,11 @@ app.post('/save_target_color', (req, res) => {
 // Load data
 app.get('/load_all', (req, res) => {
   db.all(`SELECT * FROM targets`, [], (err, rows) => {
-      if (err) {
-          console.error(err.message);
-          return res.status(500).send('Error retrieving data');
-      }
-      res.json(rows);
+    if (err) {
+      console.error(err.message);
+      return res.status(500).send('Error retrieving data');
+    }
+    res.json(rows);
   });
 });
 
@@ -118,20 +133,20 @@ app.post('/save_target_pos', (req, res) => {
   const items = req.body;
 
   items.forEach(item => {
-      db.run(
-          `INSERT INTO targets (id, color, left, top) VALUES (?, ?, ?, ?)
+    db.run(
+      `INSERT INTO targets (id, color, left, top) VALUES (?, ?, ?, ?)
            ON CONFLICT(id) DO UPDATE SET color = ?, left = ?, top = ?`,
-          [item.id, item.color, item.left, item.top, item.color, item.left, item.top]
-      );
+      [item.id, item.color, item.left, item.top, item.color, item.left, item.top]
+    );
 
 
   });
 
-  var jsonString = JSON.stringify(items); 
+  var jsonString = JSON.stringify(items);
 
-  jsonString = "'" +jsonString  + "'";
+  jsonString = "'" + jsonString + "'";
   console.log(jsonString);
-      
+
   const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter_set_color.py');
 
   // var l = item.color;
@@ -140,7 +155,8 @@ app.post('/save_target_pos', (req, res) => {
   exec(`sudo python3 ${scriptPath} ${jsonString}`, (err, stdout, stderr) => {
     if (err) {
       console.error(`Error: ${stderr}`);
-     // return res.status(500).send('Error executing Python script');
+      animInProgress = false;
+      // return res.status(500).send('Error executing Python script');
     }
 
     // Send success response with script output
@@ -151,8 +167,8 @@ app.post('/save_target_pos', (req, res) => {
     // });
   });
 
-  
-  
+
+
 
 
   res.status(200).send('Data saved successfully');
@@ -162,12 +178,22 @@ app.post('/save_target_pos', (req, res) => {
 app.post('/anim-test', (req, res) => {
   const items = req.body;
 
-  items.nid= nid;
-  var jsonString = JSON.stringify(items); 
-  
-  jsonString = "'" +jsonString  + "'";
+  items.nid = nid;
+  var jsonString = JSON.stringify(items);
+
+  jsonString = "'" + jsonString + "'";
   console.log(jsonString);
-      
+
+  animateTarget(jsonString, res);
+
+  res.status(200).send('Ok');
+});
+
+
+function animateTarget(jsonString) {
+
+  let animInProgress = true;
+
   const scriptPath = path.join('/home/yan/sx126x_lorawan_hat_code/python/lora/examples/SX126x/', 'transmitter_set_color.py');
 
   // var l = item.color;
@@ -176,7 +202,7 @@ app.post('/anim-test', (req, res) => {
   exec(`sudo python3 ${scriptPath} ${jsonString}`, (err, stdout, stderr) => {
     if (err) {
       console.error(`Error: ${stderr}`);
-     // return res.status(500).send('Error executing Python script');
+      // return res.status(500).send('Error executing Python script');
     }
 
     // Send success response with script output
@@ -187,12 +213,67 @@ app.post('/anim-test', (req, res) => {
     // });
   });
 
-  res.status(200).send('Data saved successfully');
-});
-
+}
 
 
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
+
+function connectWebSocket() {
+  console.log(`Connecting to WebSocket server at ${WEBSOCKET_URL}...`);
+
+  ws = new WebSocket(WEBSOCKET_URL);
+
+  // Handle WebSocket open event
+  ws.on('open', () => {
+    console.log('Connected to WebSocket server');
+    ws.send('Hello from iTarget!');
+  });
+
+  // Handle incoming messages
+  ws.on('message', (message) => {
+    console.log(`Received message from WebSocket server: ${message}`);
+    // var targetHit = JSON.stringify(message);
+
+    // var data = { id: targetHit.target, nid: nid, anim: 1 }
+    // targetList.add(data);
+
+    // if (!animInProgress) {
+
+    //   animateTarget(data);
+
+    //   targetList.remove(data);
+
+
+    // }
+
+    var targetHit = JSON.stringify(message);
+
+    if (targetHit.distance < 6) {
+
+      var data = { id: targetHit.target, nid: nid, anim: 1 }
+      animateTarget(data);
+
+    }
+
+
+  });
+
+  // Handle errors
+  ws.on('error', (error) => {
+    console.error(`WebSocket error: ${error.message}`);
+  });
+
+  // Handle connection close and attempt to reconnect
+  ws.on('close', () => {
+    console.log('Disconnected from WebSocket server. Reconnecting in 5 seconds...');
+    setTimeout(connectWebSocket, 5000); // Retry after 5 seconds
+  });
+}
+
+// Start the WebSocket connection
+connectWebSocket();
