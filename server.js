@@ -231,7 +231,7 @@ function connectWebSocket() {
   // Handle WebSocket open event
   ws.on('open', () => {
     console.log('Connected to WebSocket server');
-    ws.send('Hello from iTarget!');
+//    ws.send('Hello from iTarget!');
   });
 
   // Handle incoming messages
@@ -251,12 +251,38 @@ function connectWebSocket() {
 
     // }
 
-    var targetHit = JSON.stringify(message);
+//message.toString()    var targetH = message.toString();
+//  var targetH_ = JSON.stringify(message.toString())
+   var   target_ ; 
+   var targetHit ;
+ var total_leds=50;
+    message  = message.toString();
+ 
+  // targetHit = JSON.stringify(target_) // Try to parse the string
 
-    if (targetHit.distance < 6) {
+    const startIndex = message.indexOf('"distance"') + 11; // Position after "distance":
+    const endIndex = message.indexOf(",", startIndex); // Find the next comma
+    const value = message.substring(startIndex, endIndex !== -1 ? endIndex : message.length-1).trim();
+    console.log("Distance:", value);
 
-      var data = { id: targetHit.target, nid: nid, anim: 1 }
-      animateTarget(data);
+
+//   var tempName = String(targetHit.target);
+//	targetHit.target = "T" + tempName.substring(7,8)
+	console.log( value );
+ // console.log( targetHit.bay );
+   //     console.log( targetHit );;
+   if (value < 15) {
+  
+var led_per = 100 - matchPercentage(15, value)
+var num_leds = (led_per * (total_leds/100));
+    console.log("close to target")
+     var data = { id: "T1" , anim:"1",  nid: nid, leds:num_leds }
+
+  var jsonString = JSON.stringify(data);
+
+  jsonString = "'" + jsonString + "'";
+	console.log(data)      
+	animateTarget(jsonString);
 
     }
 
@@ -275,5 +301,10 @@ function connectWebSocket() {
   });
 }
 
+function matchPercentage(referenceNumber, randomNumber) {
+    // Calculate the percentage and round up to the next integer
+    const percentage = Math.ceil((randomNumber / referenceNumber) * 100);
+    return percentage;
+}
 // Start the WebSocket connection
 connectWebSocket();
