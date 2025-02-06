@@ -7,7 +7,7 @@ const WebSocket = require('ws');
 const app = express();
 const nid = "T_1000";
 
-const WEBSOCKET_URL = 'ws://10.240.242.96:8765';
+const WEBSOCKET_URL = 'ws://192.168.1.70:8080';
 let ws;
 let animInProgress = false;
 
@@ -265,7 +265,7 @@ function connectWebSocket() {
     const value = message.substring(startIndex, endIndex !== -1 ? endIndex : message.length-1).trim();
     console.log("Distance:", value);
 
-
+let js_message = JSON.parse(message);
 //   var tempName = String(targetHit.target);
 //	targetHit.target = "T" + tempName.substring(7,8)
 	console.log( value );
@@ -276,7 +276,7 @@ function connectWebSocket() {
 var led_per = 100 - matchPercentage(15, value)
 var num_leds = (led_per * (total_leds/100));
     console.log("close to target")
-     var data = { id: "T1" , anim:"1",  nid: nid, leds:num_leds }
+     var data = { id: "T1" , anim:"1", percent: js_message.percent,  nid: nid, leds:num_leds, color: js_message.color }
 
   var jsonString = JSON.stringify(data);
 
