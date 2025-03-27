@@ -234,7 +234,7 @@ async function connectRabbitMQ() {
   try {
     // Connect to RabbitMQ
     const connection = await amqp.connect({
-      protocol: 'amqps',
+      protocol: 'amqp',
       hostname: '192.16.1.1',
       port: 5673,
       username: 'iTarget',
@@ -294,8 +294,11 @@ function processMessage(message) {
     return;
   }
   console.log('Distance:', distance);
-  let percent = matchPercentage(distance);
+  let percent = matchPercentage(distance, 4);
 
+  if (percent < 33) {
+    percent = 33;
+  }
 
   // Check if distance is close to the target
 
@@ -403,9 +406,9 @@ function animateTarget(jsonString) {
   console.log(`Animating target with data: ${jsonString}`);
 }
 
-function matchPercentage(referenceNumber, randomNumber) {
+function matchPercentage(num, referenceNumber) {
   // Calculate the percentage and round up to the next integer
-  const percentage = 100(Math.ceil((randomNumber / referenceNumber) * 100));
+  const percentage = 100 - (Math.ceil((num / referenceNumber) * 100));
   return percentage;
 }
 
