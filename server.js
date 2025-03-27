@@ -251,6 +251,7 @@ async function connectRabbitMQ() {
     // Create a queue that will receive messages
     const { queue } = await channel.assertQueue(QUEUE, { durable: false });
 
+
     // Bind the queue to the exchange with a routing key
     await channel.bindQueue(queue, EXCHANGE, ROUTING_KEY);
 
@@ -402,9 +403,9 @@ connectRabbitMQ();
 //   });
 // }
 
-function animateTarget(jsonString) {
-  console.log(`Animating target with data: ${jsonString}`);
-}
+// function animateTarget(jsonString) {
+//   console.log(`Animating target with data: ${jsonString}`);
+// }
 
 function matchPercentage(num, referenceNumber) {
   // Calculate the percentage and round up to the next integer
