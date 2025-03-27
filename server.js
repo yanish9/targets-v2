@@ -3,6 +3,7 @@ const path = require("path");
 const { exec } = require('child_process');
 const sqlite3 = require('sqlite3').verbose();
 const WebSocket = require('ws');
+const amqp = require('amqplib');
 
 const app = express();
 const nid = "T_1000";
@@ -10,6 +11,10 @@ const nid = "T_1000";
 const WEBSOCKET_URL = 'ws://192.168.1.70:8080';
 let ws;
 let animInProgress = false;
+
+const QUEUE = 'queue_itarget';
+const EXCHANGE = 'awg.real_time_events';
+const ROUTING_KEY = 'event.action_region_hit';
 
 let targetList = {}
 
@@ -35,7 +40,7 @@ db.all(`SELECT * FROM targets`, [], (err, rows) => {
     console.error(err.message);
     return res.status(500).send('Error retrieving data');
   }
-  console.log(rows)
+  // console.log(rows)
 });
 
 // Fallback route for other requests
@@ -222,89 +227,188 @@ app.listen(PORT, () => {
 });
 
 
+async function connectRabbitMQ() {
+  // RabbitMQ connection string
+  var rabbit_link = 'amqps://iTarget:lights.@192.16.1.1:5673';
 
-function connectWebSocket() {
-  console.log(`Connecting to WebSocket server at ${WEBSOCKET_URL}...`);
+  try {
+    // Connect to RabbitMQ
+    const connection = await amqp.connect({
+      protocol: 'amqps',
+      hostname: '192.16.1.1',
+      port: 5673,
+      username: 'iTarget',
+      password: 'lights.',
+      vhost: '/',
+      servername: false,
+    }
+    );
+    const channel = await connection.createChannel();
 
-  ws = new WebSocket(WEBSOCKET_URL);
+    // Declare the exchange as a topic
+    await channel.assertExchange(EXCHANGE, 'topic', { durable: false });
 
-  // Handle WebSocket open event
-  ws.on('open', () => {
-    console.log('Connected to WebSocket server');
-//    ws.send('Hello from iTarget!');
-  });
+    // Create a queue that will receive messages
+    const { queue } = await channel.assertQueue(QUEUE, { durable: false });
 
-  // Handle incoming messages
-  ws.on('message', (message) => {
-    console.log(`Received message from WebSocket server: ${message}`);
-    // var targetHit = JSON.stringify(message);
+    // Bind the queue to the exchange with a routing key
+    await channel.bindQueue(queue, EXCHANGE, ROUTING_KEY);
 
-    // var data = { id: targetHit.target, nid: nid, anim: 1 }
-    // targetList.add(data);
+    // Consume messages from the queue
+    console.log(`Waiting for messages in ${queue}.`);
 
-    // if (!animInProgress) {
+    channel.consume(
+      queue,
+      (msg) => {
+        if (msg) {
+          // Convert message to string
+          const message = msg.content.toString();
+          console.log(`Received: ${message}`);
 
-    //   animateTarget(data);
+          // Process the received message
+          processMessage(message);
+        }
+      },
+      { noAck: true }
+    );
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
 
-    //   targetList.remove(data);
+function processMessage(message) {
+  let js_message;
+  try {
+    // Parse incoming message as JSON
+    js_message = JSON.parse(message);
+  } catch (error) {
+    console.error('Invalid JSON format:', error);
+    return;
+  }
+
+  var tid_ = js_message.ActionRegion.Number
+  const distance = parseFloat(js_message.DistanceToTarget);
+
+  if (isNaN(distance)) {
+    console.error('Invalid distance value:', value);
+    return;
+  }
+  console.log('Distance:', distance);
+  let percent = matchPercentage(distance);
 
 
-    // }
+  // Check if distance is close to the target
 
-//message.toString()    var targetH = message.toString();
-//  var targetH_ = JSON.stringify(message.toString())
-   var   target_ ; 
-   var targetHit ;
- var total_leds=50;
-    message  = message.toString();
- 
-  // targetHit = JSON.stringify(target_) // Try to parse the string
+  var data = {
+    id: tid_,
+    anim: '1',
+    percent: percent,
+    nid: nid
+  };
 
-    const startIndex = message.indexOf('"distance"') + 11; // Position after "distance":
-    const endIndex = message.indexOf(",", startIndex); // Find the next comma
-    const value = message.substring(startIndex, endIndex !== -1 ? endIndex : message.length-1).trim();
-    console.log("Distance:", value);
+  console.log(data);
 
-let js_message = JSON.parse(message);
-//   var tempName = String(targetHit.target);
-//	targetHit.target = "T" + tempName.substring(7,8)
-	console.log( value );
- // console.log( targetHit.bay );
-   //     console.log( targetHit );;
-   if (value < 15) {
-  
-var led_per = 100 - matchPercentage(15, value)
-var num_leds = (led_per * (total_leds/100));
-    console.log("close to target")
-     var data = { id: "T1" , anim:"1", percent: js_message.percent,  nid: nid, leds:num_leds, color: js_message.color }
-
+  // Send data for animation
   var jsonString = JSON.stringify(data);
 
   jsonString = "'" + jsonString + "'";
-	console.log(data)      
-	animateTarget(jsonString);
 
-    }
+  animateTarget(jsonString);
+}
 
 
-  });
+// Run RabbitMQ connection
+connectRabbitMQ();
 
-  // Handle errors
-  ws.on('error', (error) => {
-    console.error(`WebSocket error: ${error.message}`);
-  });
 
-  // Handle connection close and attempt to reconnect
-  ws.on('close', () => {
-    console.log('Disconnected from WebSocket server. Reconnecting in 5 seconds...');
-    setTimeout(connectWebSocket, 5000); // Retry after 5 seconds
-  });
+// function connectWebSocket() {
+//   console.log(`Connecting to WebSocket server at ${WEBSOCKET_URL}...`);
+
+//   ws = new WebSocket(WEBSOCKET_URL);
+
+//   // Handle WebSocket open event
+//   ws.on('open', () => {
+//     console.log('Connected to WebSocket server');
+// //    ws.send('Hello from iTarget!');
+//   });
+
+//   // Handle incoming messages
+//   ws.on('message', (message) => {
+//     console.log(`Received message from WebSocket server: ${message}`);
+//     // var targetHit = JSON.stringify(message);
+
+//     // var data = { id: targetHit.target, nid: nid, anim: 1 }
+//     // targetList.add(data);
+
+//     // if (!animInProgress) {
+
+//     //   animateTarget(data);
+
+//     //   targetList.remove(data);
+
+
+//     // }
+
+// //message.toString()    var targetH = message.toString();
+// //  var targetH_ = JSON.stringify(message.toString())
+//    var   target_ ; 
+//    var targetHit ;
+//  var total_leds=50;
+//     message  = message.toString();
+
+//   // targetHit = JSON.stringify(target_) // Try to parse the string
+
+//     const startIndex = message.indexOf('"distance"') + 11; // Position after "distance":
+//     const endIndex = message.indexOf(",", startIndex); // Find the next comma
+//     const value = message.substring(startIndex, endIndex !== -1 ? endIndex : message.length-1).trim();
+//     console.log("Distance:", value);
+
+// let js_message = JSON.parse(message);
+// //   var tempName = String(targetHit.target);
+// // targetHit.target = "T" + tempName.substring(7,8)
+//  console.log( value );
+//  // console.log( targetHit.bay );
+//    //     console.log( targetHit );;
+//    if (value < 15) {
+
+// var led_per = 100 - matchPercentage(15, value)
+// var num_leds = (led_per * (total_leds/100));
+//     console.log("close to target")
+//      var data = { id: "T1" , anim:"1", percent: js_message.percent,  nid: nid, leds:num_leds, color: js_message.color }
+
+//   var jsonString = JSON.stringify(data);
+
+//   jsonString = "'" + jsonString + "'";
+//  console.log(data)      
+//  animateTarget(jsonString);
+
+//     }
+
+
+//   });
+
+//   // Handle errors
+//   ws.on('error', (error) => {
+//     console.error(`WebSocket error: ${error.message}`);
+//   });
+
+//   // Handle connection close and attempt to reconnect
+//   ws.on('close', () => {
+//     console.log('Disconnected from WebSocket server. Reconnecting in 5 seconds...');
+//     setTimeout(connectWebSocket, 5000); // Retry after 5 seconds
+//   });
+// }
+
+function animateTarget(jsonString) {
+  console.log(`Animating target with data: ${jsonString}`);
 }
 
 function matchPercentage(referenceNumber, randomNumber) {
-    // Calculate the percentage and round up to the next integer
-    const percentage = Math.ceil((randomNumber / referenceNumber) * 100);
-    return percentage;
+  // Calculate the percentage and round up to the next integer
+  const percentage = 100(Math.ceil((randomNumber / referenceNumber) * 100));
+  return percentage;
 }
-// Start the WebSocket connection
-connectWebSocket();
+
+
+// // Start the WebSocket connection
+// connectWebSocket();
