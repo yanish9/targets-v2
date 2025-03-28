@@ -328,7 +328,10 @@ async function connectRabbitMQ() {
       { noAck: true }
     );
   } catch (error) {
+
     console.error('Error:', error);
+
+    setTimeout(connectRabbitMQ, 2000);
   }
 }
 
@@ -369,7 +372,7 @@ function processMessage(message) {
     percent = 33;
   }
 
-  if (percent > 85) {
+  if (percent > 80) {
     percent = 100;
   }
 
