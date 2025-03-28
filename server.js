@@ -16,6 +16,61 @@ const QUEUE = 'queue_itarget';
 const EXCHANGE = 'awg.real_time_events';
 const ROUTING_KEY = 'event.action_region_hit';
 
+let targetInfo = [
+  {
+    "id": "1",
+    "radius": 4
+  },
+  {
+    "id": "2",
+    "radius": 4
+  },
+  {
+    "id": "3",
+    "radius": 4
+  },
+  {
+    "id": "4",
+    "radius": 4
+  },
+  {
+    "id": "5",
+    "radius": 4
+  },
+  {
+    "id": "6",
+    "radius": 4.5
+  },
+  {
+    "id": "7",
+    "radius": 4.5
+  },
+  {
+    "id": "8",
+    "radius": 4.5
+  },
+  {
+    "id": "9",
+    "radius": 5.2
+  },
+  {
+    "id": "10",
+    "radius": 5.2
+  },
+  {
+    "id": "11",
+    "radius": 5.2
+  },
+  {
+    "id": "12",
+    "radius": 5
+  },
+  {
+    "id": "13",
+    "radius": 5.2
+  }
+]
+
 let targetList = {}
 
 
@@ -295,16 +350,34 @@ function processMessage(message) {
     return;
   }
   console.log('Distance:', distance);
-  let percent = matchPercentage(distance, 4);
+
+  const searchId = tid_.toString();
+  const result = targetInfo.find(target => target.id === searchId);
+
+  let targetSize = 4;
+  if (result) {
+    console.log(`Distance for ID ${searchId}: ${result.radius}`);
+    targetSize = result.radius;
+  } else {
+    console.log(`ID ${searchId} not found`);
+  }
+
+
+  let percent = matchPercentage(distance, targetSize);
 
   if (percent < 33) {
     percent = 33;
   }
 
+  if (percent > 85) {
+    percent = 100;
+  }
+
+
   // Check if distance is close to the target
 
   var data = {
-    id: tid_,
+    id: tid_.toString(),
     anim: '1',
     percent: percent,
     nid: nid
@@ -319,6 +392,7 @@ function processMessage(message) {
 
   animateTarget(jsonString);
 }
+
 
 
 // Run RabbitMQ connection
