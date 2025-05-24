@@ -90,13 +90,6 @@ const PORT = 3000;
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, "public")));
 
-db.all(`SELECT * FROM targets`, [], (err, rows) => {
-  if (err) {
-    console.error(err.message);
-    return res.status(500).send('Error retrieving data');
-  }
-  // console.log(rows)
-});
 
 // Fallback route for other requests
 app.get("/", (req, res) => {
