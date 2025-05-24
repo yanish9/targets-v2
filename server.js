@@ -4,6 +4,8 @@ const { exec } = require('child_process');
 const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
+const nid = "T_1000";
+
 app.use(express.json());
 
 const db = new sqlite3.Database('./targets.db');
@@ -39,6 +41,7 @@ app.post('/save_target_color', (req, res) => {
   console.log(item.id)
   console.log(item.color)
 
+
   console.log("__________________")
 
       db.run(
@@ -48,7 +51,7 @@ app.post('/save_target_color', (req, res) => {
       );
 
 
- 
+ item.nid = nid; 
 
   var jsonString = JSON.stringify(item); 
 
@@ -73,9 +76,6 @@ app.post('/save_target_color', (req, res) => {
     //   message: `Color RGB(${item.color}) saved successfully`,
     // });
   });
-
-  
-
 
   res.status(200).send('Data saved successfully');
 });
