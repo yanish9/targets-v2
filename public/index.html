@@ -36,6 +36,15 @@
             justify-content: center;
             padding: 10px;
             position: relative;
+<<<<<<< HEAD
+=======
+
+            background-image: url(img/map.jpg);
+            background-repeat: no-repeat;
+            background-size: contain;
+            
+
+>>>>>>> e47dfe65eca50d6a896a04f7acc3f20cd11b2bda
         }
         .drag-main {
             height: 100%;
@@ -65,6 +74,7 @@
     </style>
 </head>
 <body>
+<<<<<<< HEAD
     <div class=" logo pt-2 pb-2" > <img src="img/itarget.png" width="200"> </div>
     <div class="container-fluid h-100">
        
@@ -251,6 +261,205 @@
             enableDraggingButton.style.display = 'none';
             doneButton.style.display = 'block';
 
+=======
+    <div class=" logo pt-2 pb-2" >	
+        <button id="reload-btn" class="btn btn-primary m-2 ml-2 position-absolute" onClick="reloadPage()">&#x21bb;</button>
+         <img src="img/itarget.png" width="200">
+         <!-- <div class="control-buttons">
+                  
+         </div> -->
+         <button class="btn btn-primary position-absolute  m-3 mr-2 top-0 end-0" id="enableDraggingButton">Re-arrange Targets</button>
+         <button class="btn btn-success position-absolute   m-3 mr-2 top-0 end-0" id="doneButton" style="display: none;">Done</button>
+    </div>
+    <div class="container-fluid h-100">
+       
+        <div class="row h-100">
+            <!-- Left Section: Color Palette -->
+            <div class="col-md-4 bg-light overflow-auto position-relative">
+                <!-- <button class="btn btn-success save-button" id="saveButton">Save</button> -->
+               
+
+                <h2 class="text-center mt-4">Color</h2>
+                <div class="row text-center">
+                    <!-- Color Blocks -->
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(0, 0, 255);" class="color-block " data-color="rgb(0, 0, 255)">Blue</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(160, 32, 240);" class="color-block"  data-color="rgb(160, 32, 240)">Purple</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(100, 15, 90)" class="color-block  " data-color="rgb(100, 15, 90)" data-actual-color='' >Purple 2</div>
+                    </div>
+                    
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(255, 251, 0); color:black;" class="color-block  " data-color="rgb(255, 130, 0)" data-actual-color='' >Yellow</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(0,255,0);" class="color-block " data-color="rgb(0,255,0)">Green</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(255, 0, 0);"  class="color-block " data-color="rgb(255, 0, 0)">Red</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(215, 70, 0)" class="color-block  " data-color="rgb(215, 20, 0)" data-actual-color='' >Orange</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(0, 255, 255)" class="color-block  " data-color="rgb(0, 255, 255)" data-actual-color='' >Teal</div>
+                    </div>
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(255, 0, 255)" class="color-block  " data-color="rgb(255, 0, 255)" data-actual-color='' >Pink</div>
+                    </div>
+                    <!-- <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(255, 255, 255); color:black;" class="color-block  " data-color="rgb(255, 255, 255)" data-actual-color='' >White</div>
+                    </div> -->
+                    <div class="col-md-6 col-sm-4 mb-3">
+                        <div style="background-color:rgb(0, 0, 0)" class="color-block  " data-color="rgb(0, 0, 0)" data-actual-color='' >OFF</div>
+                    </div>
+                    
+                </div>
+               <div class="d-flex justify-content-center">
+                <button class="btn btn-secondary anim-button  m-auto w-100" id="anim-button" >Animation Test</button>
+                    <!-- <div  class="btn btn-secondary m-auto w-100"   "></div> -->
+              
+            </div>
+            </div>
+
+            <!-- Right Section: Draggable Items -->
+            <div class="col-md-8 d-flex">
+                <div class="drag-main mt-1 ">
+
+            
+                <div class="drag-container w-100">
+                    <div class="draggable" draggable="true" id="T1" style="left: 50px; top: 50px;">T 1</div>
+                    <div class="draggable" draggable="true" id="pg2" style="left: 150px; top: 50px;">T 2</div>
+                    <div class="draggable" draggable="true" id="pg3" style="left: 250px; top: 50px;">T 3</div>
+		    <div class="draggable" draggable="true" id="pg4" style="left: 5px; top 5px;">T 4</div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+   
+    <div id="saveMessage" class="alert alert-success position-fixed top-0 end-0 m-3" style="display: none; z-index: 1050;">
+        Saved successfully!
+    </div>
+    <script>
+        let selectedElement = null;
+        let currentDraggable = null;
+    
+        const enableDraggingButton = document.getElementById('enableDraggingButton');
+        const doneButton = document.getElementById('doneButton');
+        const draggables = document.querySelectorAll('.draggable');
+        const container = document.querySelector('.drag-container');
+        let isDraggingEnabled = false;
+        const colorBlocks = document.querySelectorAll('.color-block');
+        const animBtn = document.getElementById('anim-button');
+    
+        window.addEventListener('DOMContentLoaded', () => {
+            // Fetch saved data from the backend on page load
+            fetch('/load_all')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Loaded data:', data);
+                    data.forEach(item => {
+                        const element = document.getElementById(item.id);
+                        if (element) {
+                            element.style.backgroundColor = item.color;
+                            element.style.left = item.left;
+                            element.style.top = item.top;
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading data:', error));
+        });
+    
+        const updatePosition = (e, draggable) => {
+            const containerRect = container.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - containerRect.left;
+            const y = (e.clientY || e.touches[0].clientY) - containerRect.top;
+    
+            draggable.style.left = `${x}px`;
+            draggable.style.top = `${y}px`;
+    
+            console.log(`Moved ${draggable.id} to position: (${x}px, ${y}px)`);
+        };
+    
+        const toggleDragging = (enable) => {
+    
+            draggables.forEach(draggable => {
+                draggable.addEventListener('click', () => {
+                    draggables.forEach(item => item.classList.remove('selected'));
+                    draggable.classList.add('selected');
+                    selectedElement = draggable;
+                    console.log(`Selected: ${draggable.id}`);
+                });
+                if (enable) {
+                    draggable.addEventListener('mousedown', startDrag);
+                    draggable.addEventListener('touchstart', startDrag);
+                } else {
+                    draggable.removeEventListener('mousedown', startDrag);
+                    draggable.removeEventListener('touchstart', startDrag);
+                }
+            });
+        };
+
+        const startDrag = (event) => {
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            const draggable = event.target;
+            const rect = draggable.getBoundingClientRect();
+
+            // Calculate the offset
+            if (event.type.startsWith('touch')) {
+                const touch = event.touches[0];
+                offsetX = touch.clientX - rect.left;
+                offsetY = touch.clientY - rect.top;
+            } else {
+                offsetX = event.clientX - rect.left;
+                offsetY = event.clientY - rect.top;
+            }
+
+            const moveDrag = (moveEvent) => {
+                isDragging = true;
+                let x, y;
+                if (moveEvent.type.startsWith('touch')) {
+                    const touch = moveEvent.touches[0];
+                    x = touch.clientX - offsetX;
+                    y = touch.clientY - offsetY;
+                } else {
+                    x = moveEvent.clientX - offsetX;
+                    y = moveEvent.clientY - offsetY;
+                }
+                const containerRect = container.getBoundingClientRect();
+                draggable.style.left = `${Math.max(0, Math.min(containerRect.width - rect.width, x - containerRect.left))}px`;
+                draggable.style.top = `${Math.max(0, Math.min(containerRect.height - rect.height, y - containerRect.top))}px`;
+            };
+
+            const stopDrag = () => {
+                document.removeEventListener('mousemove', moveDrag);
+                document.removeEventListener('touchmove', moveDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+                if (isDragging) {
+                    console.log(`Stopped dragging ${draggable.id}`);
+                }
+            };
+
+            document.addEventListener('mousemove', moveDrag);
+            document.addEventListener('touchmove', moveDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+        };
+
+        enableDraggingButton.addEventListener('click', () => {
+            isDraggingEnabled = true;
+            toggleDragging(true);
+            enableDraggingButton.style.display = 'none';
+            doneButton.style.display = 'block';
+
+>>>>>>> e47dfe65eca50d6a896a04f7acc3f20cd11b2bda
         });
 
         doneButton.addEventListener('click', () => {
@@ -349,12 +558,25 @@
     
         // Save button functionality
         animBtn.addEventListener('click', () => {
+<<<<<<< HEAD
+=======
+
+            if (!selectedElement) {
+               return;
+            } 
+
+
+>>>>>>> e47dfe65eca50d6a896a04f7acc3f20cd11b2bda
             fetch('/anim-test', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+<<<<<<< HEAD
                 body: JSON.stringify({id: "pg3", anim: "1"}),
+=======
+                body: JSON.stringify({id: selectedElement.id, anim: "1"}),
+>>>>>>> e47dfe65eca50d6a896a04f7acc3f20cd11b2bda
             })
                 .then(response => {
                     if (response.ok) {
@@ -373,6 +595,15 @@
                 })
                 .catch(error => console.error('Error:', error));
         });
+<<<<<<< HEAD
+=======
+
+        function reloadPage(e){
+         
+            location.reload();
+           }
+           
+>>>>>>> e47dfe65eca50d6a896a04f7acc3f20cd11b2bda
     </script>
     
 </body>
